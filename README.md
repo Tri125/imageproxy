@@ -15,9 +15,15 @@ site (read more in [this post][]).  But you can also enable request signing and
 use it as an SSL proxy for remote images, similar to [atmos/camo][] but with
 additional image adjustment options.
 
+
 [this post]: https://willnorris.com/2014/01/a-self-hosted-alternative-to-jetpacks-photon-service
 [atmos/camo]: https://github.com/atmos/camo
 
+## Why this fork?
+
+Because the main repo is fighting the Go ecosystem. It is not ``go get``-able, the Dockerfile doesn't build a minimal image, the image can't be run on Heroku, also imageproxy options aren't read from the environnement so it's pretty awful to use in the cloud in general.
+
+This fork will fix those issues.
 
 ## URL Structure ##
 
