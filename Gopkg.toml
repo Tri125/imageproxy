@@ -1,0 +1,47 @@
+[[constraint]]
+  branch = "master"
+  name = "github.com/PaulARoy/azurestoragecache"
+
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  version = "1.12.7"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/die-net/lrucache"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/diegomarangoni/gcscache"
+
+[[constraint]]
+  name = "github.com/disintegration/imaging"
+  version = "1.2.3"
+
+[[constraint]]
+  name = "github.com/garyburd/redigo"
+  version = "1.1.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/gregjones/httpcache"
+
+[[constraint]]
+  name = "github.com/muesli/smartcrop"
+  version = "0.2.0"
+
+[[constraint]]
+  name = "github.com/peterbourgon/diskv"
+  version = "2.0.1"
+
+[[constraint]]
+  branch = "go1"
+  name = "github.com/rwcarlsen/goexif"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/image"
+
+[[constraint]]
+  branch = "master"
+  name = "willnorris.com/go/gifresize"

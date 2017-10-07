@@ -27,7 +27,6 @@ import (
 
 	"golang.org/x/net/context"
 	"golang.org/x/net/trace"
-	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
@@ -107,10 +106,10 @@ func newClientStream(ctx context.Context, desc *StreamDesc, cc *ClientConn, meth
 	var (
 		t      transport.ClientTransport
 		s      *transport.Stream
-		put    func(balancer.DoneInfo)
+		put    func()
 		cancel context.CancelFunc
 	)
-	c := defaultCallInfo()
+	c := defaultCallInfo
 	mc := cc.GetMethodConfig(method)
 	if mc.WaitForReady != nil {
 		c.failFast = !*mc.WaitForReady
@@ -127,7 +126,7 @@ func newClientStream(ctx context.Context, desc *StreamDesc, cc *ClientConn, meth
 
 	opts = append(cc.dopts.callOptions, opts...)
 	for _, o := range opts {
-		if err := o.before(c); err != nil {
+		if err := o.before(&c); err != nil {
 			return nil, toRPCErr(err)
 		}
 	}
@@ -168,7 +167,7 @@ func newClientStream(ctx context.Context, desc *StreamDesc, cc *ClientConn, meth
 			}
 		}()
 	}
-	ctx = newContextWithRPCInfo(ctx, c.failFast)
+	ctx = newContextWithRPCInfo(ctx)
 	sh := cc.dopts.copts.StatsHandler
 	if sh != nil {
 		ctx = sh.TagRPC(ctx, &stats.RPCTagInfo{FullMethodName: method, FailFast: c.failFast})
@@ -218,7 +217,7 @@ func newClientStream(ctx context.Context, desc *StreamDesc, cc *ClientConn, meth
 				updateRPCInfoInContext(ctx, rpcInfo{bytesSent: true, bytesReceived: false})
 			}
 			if put != nil {
-				put(balancer.DoneInfo{Err: err})
+				put()
 				put = nil
 			}
 			if _, ok := err.(transport.ConnectionError); (ok || err == transport.ErrStreamDrain) && !c.failFast {
@@ -284,7 +283,7 @@ func newClientStream(ctx context.Context, desc *StreamDesc, cc *ClientConn, meth
 // clientStream implements a client side Stream.
 type clientStream struct {
 	opts   []CallOption
-	c      *callInfo
+	c      callInfo
 	t      transport.ClientTransport
 	s      *transport.Stream
 	p      *parser
@@ -298,7 +297,7 @@ type clientStream struct {
 	tracing bool // set to EnableTracing when the clientStream is created.
 
 	mu       sync.Mutex
-	put      func(balancer.DoneInfo)
+	put      func()
 	closed   bool
 	finished bool
 	// trInfo.tr is set when the clientStream is created (if EnableTracing is true),
@@ -495,14 +494,14 @@ func (cs *clientStream) finish(err error) {
 		}
 	}()
 	for _, o := range cs.opts {
-		o.after(cs.c)
+		o.after(&cs.c)
 	}
 	if cs.put != nil {
 		updateRPCInfoInContext(cs.s.Context(), rpcInfo{
 			bytesSent:     cs.s.BytesSent(),
 			bytesReceived: cs.s.BytesReceived(),
 		})
-		cs.put(balancer.DoneInfo{Err: err})
+		cs.put()
 		cs.put = nil
 	}
 	if cs.statsHandler != nil {
